@@ -472,6 +472,13 @@ window.runAna=function(){
   S.anaLoading=true;renderPage();
   getAIAnalytics(settled).then(function(r){if(r){S.ana=r;lsSet(SK.ANA,r)}S.anaLoading=false;renderPage()}).catch(function(){S.anaLoading=false;renderPage()});
 };
+window.saveSett2=function(){
+  var ok=document.getElementById("s-ok"),tt=document.getElementById("s-tt"),tc=document.getElementById("s-tc");
+  if(ok&&ok.value)S.cfg.oddsKey=ok.value;
+  if(tt&&tt.value)S.cfg.tgToken=tt.value;
+  if(tc&&tc.value)S.cfg.tgChatId=tc.value;
+  lsSet(SK.CFG,S.cfg);
+};
 window.saveSett=function(){
   var ok=document.getElementById("s-ok"),tt=document.getElementById("s-tt"),tc=document.getElementById("s-tc");
   if(ok)S.cfg.oddsKey=ok.value;if(tt)S.cfg.tgToken=tt.value;if(tc)S.cfg.tgChatId=tc.value;
@@ -481,7 +488,7 @@ window.testConn=function(){
   saveSett();if(!S.cfg.oddsKey)return;S.stTesting=true;renderPage();
   testKey(S.cfg.oddsKey).then(function(n){alert("Connected - "+n+" sports available");S.stTesting=false;renderPage()}).catch(function(){alert("Invalid key or quota exceeded");S.stTesting=false;renderPage()});
 };
-window.testTg=function(){saveSett();tgSend("BetTrack Pro connected! You will get live updates and results for every bet.");alert("Test message sent!")};
+window.testTg=function(){saveSett2();tgSend("BetTrack Pro connected! You will get live updates and results for every bet.");alert("Test message sent!")};
 window.clearAll=function(){if(!confirm("Delete ALL bet data? Cannot be undone."))return;S.bets=[];S.ana=null;lsSet(SK.BETS,[]);lsSet(SK.ANA,null);toast("All data cleared");renderPage()};
 try{render();startPoll()}catch(e){document.getElementById("page").innerHTML='<div style="padding:30px;color:#f43f5e;font-size:13px;font-family:monospace"><b>Error: </b>'+(e&&e.message?e.message:String(e))+'</div>'}
 </script>
