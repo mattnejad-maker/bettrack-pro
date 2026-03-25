@@ -57,11 +57,9 @@ html,body{min-height:100%;background:var(--bg);color:var(--txt);font-family:'Int
 .bcard-icon{width:40px;height:40px;border-radius:11px;background:var(--pur-bg);border:1px solid var(--pur-bdr);display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;font-size:18px;-webkit-flex-shrink:0;flex-shrink:0}
 .bcard-info{-webkit-flex:1;flex:1;min-width:0}
 .bcard-teams{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
-.bcard-sub{font-size:12px;color:var(--sub);display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;gap:6px;flex-wrap:wrap}
 .bcard-right{text-align:right;-webkit-flex-shrink:0;flex-shrink:0}
 .bcard-body{padding:14px 16px;border-top:1px solid var(--bdr)}
 .badge{display:inline-block;border-radius:20px;padding:4px 11px;font-size:10px;font-weight:700;letter-spacing:.2px}
-/* BUTTONS */
 .btn-p{background:linear-gradient(135deg,var(--pur),var(--pur2));color:#fff;border:none;border-radius:14px;padding:14px 22px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:-webkit-inline-flex;display:inline-flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;gap:8px;width:100%}
 .btn-p:active{opacity:.8}
 .btn-p[disabled]{opacity:.35;cursor:not-allowed}
@@ -73,14 +71,13 @@ html,body{min-height:100%;background:var(--bg);color:var(--txt);font-family:'Int
 .btn-lost{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bdr);border-radius:10px;padding:9px 15px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
 .btn-push{background:rgba(59,130,246,.1);color:var(--blu);border:1px solid rgba(59,130,246,.25);border-radius:10px;padding:9px 15px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
 .btn-icon{background:var(--surf2);color:var(--sub);border:1px solid var(--bdr);border-radius:10px;padding:9px 12px;font-size:13px;cursor:pointer;font-family:inherit}
-/* INPUTS - FORCE DARK */
+.btn-tg{background:linear-gradient(135deg,var(--pur),var(--pur2));color:#fff;border:none;border-radius:12px;padding:13px 20px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-top:4px}
 .flbl{font-size:12px;font-weight:600;color:var(--sub);margin-bottom:7px}
 .finp{width:100%;background:#1e1e2a;border:1.5px solid rgba(255,255,255,.12);color:#ffffff;font-family:'Inter',sans-serif;font-size:14px;padding:13px 15px;border-radius:13px;outline:none;-webkit-appearance:none;appearance:none;caret-color:#9b5cff}
 .finp:focus{border-color:rgba(155,92,255,.6);background:#252535}
 .finp::placeholder{color:rgba(255,255,255,.28)}
 .finp option{background:#1e1e2a;color:#fff}
 input.finp,select.finp{-webkit-text-fill-color:#ffffff !important;color:#ffffff !important;background-color:#1e1e2a !important}
-input.finp:focus,select.finp:focus{background-color:#252535 !important}
 .fgrp{margin-bottom:13px}
 .g2{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;gap:11px}
 .g2>*{-webkit-flex:1 1 calc(50% - 6px);flex:1 1 calc(50% - 6px);min-width:130px}
@@ -129,8 +126,7 @@ var SK={BETS:"btp_b9",CFG:"btp_c9",ANA:"btp_a9"};
 var POLL_MS=60000;
 var NAV=[{id:"dashboard",icon:"&#9782;",label:"Home"},{id:"picks",icon:"&#9889;",label:"Picks"},{id:"add",icon:"&#43;",label:"Add"},{id:"history",icon:"&#128196;",label:"History"},{id:"analytics",icon:"&#128200;",label:"Stats"},{id:"settings",icon:"&#9881;",label:"Setup"}];
 var S={view:"dashboard",bets:lsGet("btp_b9",[]),cfg:lsGet("btp_c9",{oddsKey:"",tgToken:"",tgChatId:""}),ana:lsGet("btp_a9",null),liveMap:{},polling:false,pickSports:["NBA","NFL","MLB","NHL","EPL"],picks:[],picksLoading:false,picksLastRun:null,form:{sport:"NBA",teams:"",betType:"Spread",betDetail:"",stake:"",odds:"",potentialPayout:"",gameDate:todayStr(),bookmaker:"",notes:""},ocring:false,ocrHit:null,histFilter:"all",anaLoading:false,stTesting:false,confirmReset:false,openCards:{}};
-var prevSc={};
-var pollTimer=null;
+var prevSc={};var pollTimer=null;
 function lsGet(k,fb){try{var r=localStorage.getItem(k);return r?JSON.parse(r):fb}catch(e){return fb}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function todayStr(){return new Date().toISOString().slice(0,10)}
@@ -187,7 +183,10 @@ function parseScore(g){
   return{home:parseInt(hs&&hs.score?hs.score:0,10),away:parseInt(as&&as.score?as.score:0,10),homeTeam:g.home_team,awayTeam:g.away_team,completed:g.completed||false};
 }
 function getLiveOdds(g){try{if(!g||!g.bookmakers||!g.bookmakers[0])return null;var mks=g.bookmakers[0].markets;for(var i=0;i<mks.length;i++){if(mks[i].key==="h2h"&&mks[i].outcomes&&mks[i].outcomes[0])return mks[i].outcomes[0].price||null}return null}catch(e){return null}}
-function tgSend(text){var tok=S.cfg.tgToken,cid=S.cfg.tgChatId;if(!tok||!cid)return;fetch("https://api.telegram.org/bot"+tok+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:cid,text:text,parse_mode:"HTML"})}).catch(function(){})}
+function tgSend(tok,cid,text){
+  if(!tok||!cid)return;
+  fetch("https://api.telegram.org/bot"+tok+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:cid,text:text,parse_mode:"HTML"})}).catch(function(){});
+}
 function claudeCall(content,maxTokens){
   return fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:maxTokens||1200,messages:[{role:"user",content:content}]})})
     .then(function(r){return r.json()}).then(function(d){var o="";if(d.content)for(var i=0;i<d.content.length;i++)o+=(d.content[i].text||"");return o});
@@ -224,14 +223,14 @@ function pollLive(){
             var ns=won?ST.WON:ST.LOST,payout=won?bet.potentialPayout:0;
             S.bets=S.bets.map(function(b){return b.id===bet.id?merge(b,{status:ns,actualPayout:payout}):b});
             lsSet(SK.BETS,S.bets);
-            tgSend((won?"WIN":"LOSS")+" - "+bet.teams+"\n"+(won?"Profit: +"+dollar(payout-bet.stake):"Loss: "+dollar(bet.stake)));
+            tgSend(S.cfg.tgToken,S.cfg.tgChatId,(won?"WIN":"LOSS")+" - "+bet.teams+"\n"+(won?"Profit: +"+dollar(payout-bet.stake):"Loss: "+dollar(bet.stake)));
             toast((won?"Won: ":"Lost: ")+bet.teams);
           }
         }else if(score){
           var prev=prevSc[bet.id];
           if((!prev||prev.home!==score.home||prev.away!==score.away)&&(score.home+score.away)>0){
             prevSc[bet.id]=score;
-            tgSend("LIVE - "+score.awayTeam+" "+score.away+" - "+score.homeTeam+" "+score.home+"\nBet: "+bet.betType+" "+bet.betDetail+"\nWin prob: "+(prob!==null?Math.round(prob*100)+"%":"--")+" - To win: "+dollar(bet.potentialPayout));
+            tgSend(S.cfg.tgToken,S.cfg.tgChatId,"LIVE - "+score.awayTeam+" "+score.away+" - "+score.homeTeam+" "+score.home+"\nBet: "+bet.betType+" "+bet.betDetail+"\nWin prob: "+(prob!==null?Math.round(prob*100)+"%":"--"));
           }
         }
       }).catch(function(){});
@@ -304,7 +303,12 @@ function betCardH(bet){
     ?'<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-won" onclick="settle(\''+bet.id+'\',\'won\')">Won</button><button class="btn-lost" onclick="settle(\''+bet.id+'\',\'lost\')">Lost</button><button class="btn-push" onclick="settle(\''+bet.id+'\',\'push\')">Push</button><button class="btn-icon" style="margin-left:auto" onclick="delBet(\''+bet.id+'\')">&#128465;</button></div>'
     :'<div style="display:flex;justify-content:flex-end"><button class="btn-icon" onclick="delBet(\''+bet.id+'\')">&#128465;</button></div>';
   var valH=active?'<div style="font-size:12px;color:var(--sub);margin-top:4px">'+dollar(bet.stake)+' \u2192 <span style="color:#9b5cff;font-weight:700">'+dollar(bet.potentialPayout)+'</span></div>':'<div style="font-size:14px;font-weight:700;margin-top:4px;color:'+profC(profit)+'">'+signed(profit)+'</div>';
-  return '<div class="bcard"><div class="bcard-head" onclick="tog(\''+bet.id+'\')"><div class="bcard-icon">'+sEmoji(bet.sport)+'</div><div class="bcard-info"><div class="bcard-teams">'+esc(bet.teams)+'</div><div class="bcard-sub"><span class="pill">'+esc(bet.sport)+'</span><span>'+esc(bet.betType)+'</span></div>'+scoreH+'</div><div class="bcard-right">'+badgeH(bet.status)+valH+'</div><span id="arr-'+bet.id+'" style="color:var(--dim);font-size:11px;margin-left:4px">'+(open?"&#9650;":"&#9660;")+'</span></div>'+(open?'<div class="bcard-body">'+probBar+dGrid+actions+'</div>':"")+'</div>';
+  return '<div class="bcard"><div class="bcard-head" onclick="tog(\''+bet.id+'\')">'
+    +'<div class="bcard-icon">'+sEmoji(bet.sport)+'</div>'
+    +'<div class="bcard-info"><div class="bcard-teams">'+esc(bet.teams)+'</div><div style="font-size:12px;color:var(--sub);display:flex;align-items:center;gap:6px"><span class="pill">'+esc(bet.sport)+'</span><span>'+esc(bet.betType)+'</span></div>'+scoreH+'</div>'
+    +'<div class="bcard-right">'+badgeH(bet.status)+valH+'</div>'
+    +'<span style="color:var(--dim);font-size:11px;margin-left:4px">'+(open?"&#9650;":"&#9660;")+'</span>'
+    +'</div>'+(open?'<div class="bcard-body">'+probBar+dGrid+actions+'</div>':"")+'</div>';
 }
 function picksH(){
   var sp=S.pickSports;
@@ -333,8 +337,14 @@ function pickCardH(s,idx){
     +'<div style="font-size:15px;font-weight:700;margin-bottom:4px">'+esc(s.teams)+'</div>'
     +'<div style="font-size:15px;font-weight:800;color:#9b5cff">'+esc(s.pick)+' <span style="color:var(--sub);font-weight:500;font-size:13px">@ '+esc(s.odds)+'</span></div>'
     +(s.gameTime?'<div style="font-size:12px;color:var(--sub);margin-top:4px">'+esc(s.gameTime)+(s.bookmaker?" - "+esc(s.bookmaker):"")+'</div>':"")+'</div>'
-    +'<div style="text-align:right;flex-shrink:0"><div style="font-size:34px;font-weight:900;line-height:1;color:'+cc+';letter-spacing:-1px">'+s.confidenceScore+'<span style="font-size:14px">%</span></div><div style="font-size:9px;font-weight:700;color:var(--sub);letter-spacing:.8px;margin-top:2px">CONFIDENCE</div>'+(s.edge?'<div style="font-size:12px;font-weight:700;color:var(--grn);margin-top:5px">'+esc(s.edge)+' edge</div>':"")+'</div></div>'
-    +'<div style="display:flex;gap:18px;margin-bottom:11px;flex-wrap:wrap">'+(s.expectedValue?'<div><div class="info-lbl">EV</div><div style="font-size:13px;font-weight:700;color:var(--grn)">'+esc(s.expectedValue)+'</div></div>':"")+(s.impliedProb?'<div><div class="info-lbl">Implied</div><div style="font-size:13px;font-weight:600;color:var(--sub)">'+esc(s.impliedProb)+'</div></div>':"")+(s.trueProb?'<div><div class="info-lbl">True Prob</div><div style="font-size:13px;font-weight:700;color:#9b5cff">'+esc(s.trueProb)+'</div></div>':"")+'</div>'
+    +'<div style="text-align:right;flex-shrink:0"><div style="font-size:34px;font-weight:900;line-height:1;color:'+cc+';letter-spacing:-1px">'+s.confidenceScore+'<span style="font-size:14px">%</span></div>'
+    +'<div style="font-size:9px;font-weight:700;color:var(--sub);letter-spacing:.8px;margin-top:2px">CONFIDENCE</div>'
+    +(s.edge?'<div style="font-size:12px;font-weight:700;color:var(--grn);margin-top:5px">'+esc(s.edge)+' edge</div>':"")+'</div></div>'
+    +'<div style="display:flex;gap:18px;margin-bottom:11px;flex-wrap:wrap">'
+    +(s.expectedValue?'<div><div class="info-lbl">EV</div><div style="font-size:13px;font-weight:700;color:var(--grn)">'+esc(s.expectedValue)+'</div></div>':"")
+    +(s.impliedProb?'<div><div class="info-lbl">Implied</div><div style="font-size:13px;font-weight:600;color:var(--sub)">'+esc(s.impliedProb)+'</div></div>':"")
+    +(s.trueProb?'<div><div class="info-lbl">True Prob</div><div style="font-size:13px;font-weight:700;color:#9b5cff">'+esc(s.trueProb)+'</div></div>':"")
+    +'</div>'
     +'<div class="pbar" style="margin-bottom:11px"><div class="pbar-f" style="width:'+s.confidenceScore+'%;background:'+cc+'"></div></div>'
     +'<p style="font-size:13px;color:var(--sub);line-height:1.65;margin-bottom:14px">'+esc(s.reasoning)+'</p>'
     +'<button class="btn-p btn-p-sm" onclick="pickAdd('+idx+')">+ Add This Bet</button>'
@@ -380,7 +390,7 @@ function anaH(){
   var settled=S.bets.filter(function(b){return b.status===ST.WON||b.status===ST.LOST||b.status===ST.PUSH});
   var d=S.ana;
   var h='<div style="padding:20px 16px 0;display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px"><div><div class="ph" style="margin-bottom:4px">Analytics</div><div style="font-size:13px;color:var(--sub)">AI breakdown of your patterns</div></div><button class="btn-p btn-p-sm" onclick="runAna()"'+(S.anaLoading||settled.length<2?" disabled":"")+'>'+(S.anaLoading?'<span class="spinner"></span>':"Run Analysis")+'</button></div>';
-  if(!d&&!S.anaLoading){h+='<div class="empty"><div class="empty-icon">&#128200;</div><div class="empty-title">Unlock your insights</div><div class="empty-sub">AI analysis of win rates, ROI, streaks, and personalized advice. Requires 2+ settled bets.</div></div>'}
+  if(!d&&!S.anaLoading){h+='<div class="empty"><div class="empty-icon">&#128200;</div><div class="empty-title">Unlock your insights</div><div class="empty-sub">AI analysis of win rates, ROI, and personalized advice.<br/><br/>Requires 2+ settled bets</div></div>'}
   else if(S.anaLoading){h+='<div style="padding:0 16px"><div class="skel" style="height:90px"></div><div class="skel" style="height:90px"></div><div class="skel" style="height:130px"></div></div>'}
   else if(d){
     h+='<div style="display:flex;gap:10px;padding:0 16px 16px"><div class="card card-p" style="flex:1"><div class="info-lbl">Win Rate</div><div style="font-size:22px;font-weight:800;color:#9b5cff">'+pct(d.overallWinRate)+'</div></div><div class="card card-p" style="flex:1"><div class="info-lbl">ROI</div><div style="font-size:22px;font-weight:800;color:'+profC(d.roi||0)+'">'+signed(d.roi||0)+'</div></div><div class="card card-p" style="flex:1"><div class="info-lbl">P&L</div><div style="font-size:22px;font-weight:800;color:'+profC(d.totalProfit||0)+'">'+signed(d.totalProfit||0)+'</div></div></div>';
@@ -403,13 +413,22 @@ function settH(){
   var c=S.cfg;
   return '<div class="pg"><div class="ph">Setup</div></div><div style="padding:0 16px">'
     +'<div style="font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.8px;margin-bottom:10px">THE ODDS API</div>'
-    +'<div class="card card-p" style="margin-bottom:16px"><p style="font-size:13px;color:var(--sub);line-height:1.75;margin-bottom:14px">Get your key at <span style="color:#7dd3fc">the-odds-api.com</span> - Free tier available, $30/mo for full live data</p><div class="fgrp"><div class="flbl">API Key</div><input type="text" class="finp" id="s-ok" autocomplete="off" placeholder="Paste your key here..." value="'+esc(c.oddsKey)+'"/></div><div style="display:flex;gap:10px"><button class="btn-p btn-p-sm" onclick="testConn()"'+(S.stTesting||!c.oddsKey?" disabled":"")+'>'+(S.stTesting?'<span class="spinner"></span>':"Test Connection")+'</button><button class="btn-g btn-g-sm" onclick="saveSett()">Save</button></div></div>'
+    +'<div class="card card-p" style="margin-bottom:16px">'
+    +'<p style="font-size:13px;color:var(--sub);line-height:1.75;margin-bottom:14px">Get your key at <span style="color:#7dd3fc">the-odds-api.com</span><br/>Free tier available - $30/mo for full live data</p>'
+    +'<div class="fgrp"><div class="flbl">API Key</div><input id="s-ok" class="finp" type="text" autocomplete="off" placeholder="Paste your key here..." value="'+esc(c.oddsKey)+'"/></div>'
+    +'<div style="display:flex;gap:10px"><button class="btn-p btn-p-sm" onclick="testConn()"'+(S.stTesting?" disabled":"")+'>'+(S.stTesting?'<span class="spinner"></span>':"Test Connection")+'</button><button class="btn-g btn-g-sm" onclick="saveOddsKey()">Save</button></div>'
+    +'</div>'
     +'<div style="font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.8px;margin-bottom:10px">TELEGRAM NOTIFICATIONS</div>'
-    +'<div class="card card-p" style="margin-bottom:16px"><p style="font-size:13px;color:var(--sub);line-height:1.85;margin-bottom:14px">1. Message <b style="color:#fff">@BotFather</b> on Telegram - /newbot - copy token<br/>2. Start your bot, then open:<br/><span style="color:#7dd3fc;font-size:11px">api.telegram.org/bot[TOKEN]/getUpdates</span><br/>3. Copy your <b style="color:#fff">chat_id</b></p><div class="fgrp"><div class="flbl">Bot Token</div><input type="text" class="finp" id="s-tt" autocomplete="off" placeholder="123456:ABCdef..." value="'+esc(c.tgToken)+'"/></div><div class="fgrp"><div class="flbl">Chat ID</div><input class="finp" id="s-tc" placeholder="123456789" value="'+esc(c.tgChatId)+'"/></div><button class="btn-p btn-p-sm" onclick="testTg()"'+(!c.tgToken||!c.tgChatId?" disabled":"")+'>Save & Send Test</button></div>'
+    +'<div class="card card-p" style="margin-bottom:16px">'
+    +'<p style="font-size:13px;color:var(--sub);line-height:1.85;margin-bottom:14px">1. Message <b style="color:#fff">@BotFather</b> on Telegram - /newbot - copy token<br/>2. Start your bot, then open:<br/><span style="color:#7dd3fc;font-size:11px">api.telegram.org/bot[TOKEN]/getUpdates</span><br/>3. Copy your <b style="color:#fff">chat_id</b></p>'
+    +'<div class="fgrp"><div class="flbl">Bot Token</div><input id="s-tt" class="finp" type="text" autocomplete="off" placeholder="8688124872:AAEQDmo..." value="'+esc(c.tgToken)+'"/></div>'
+    +'<div class="fgrp"><div class="flbl">Chat ID</div><input id="s-tc" class="finp" type="text" autocomplete="off" inputmode="numeric" placeholder="8088474987" value="'+esc(c.tgChatId)+'"/></div>'
+    +'<button class="btn-tg" onclick="saveTg()">Save &amp; Send Test</button>'
+    +'</div>'
     +'<div style="font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.8px;margin-bottom:10px">DATA</div>'
     +'<div class="card card-p" style="margin-bottom:16px"><p style="font-size:13px;color:var(--sub);margin-bottom:14px"><span style="color:#fff;font-weight:700">'+S.bets.length+'</span> bets stored - <span style="color:#fff;font-weight:700">'+dollar(S.bets.reduce(function(s,b){return s+b.stake},0))+'</span> total staked</p><button class="btn-danger" onclick="clearAll()">Delete All Data</button></div>'
     +'<div style="font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.8px;margin-bottom:10px">YOUR LIVE URL</div>'
-    +'<div class="card card-p" style="margin-bottom:20px"><div style="background:var(--surf2);border:1px solid var(--bdr2);border-radius:10px;padding:12px;font-size:12px;color:#9b5cff;word-break:break-all;font-weight:600">mattnejad-maker.github.io/bettrack-pro</div><p style="font-size:11px;color:var(--sub);margin-top:10px;line-height:1.6">In Safari: tap Share - Add to Home Screen to install as an app icon on your phone</p></div></div>';
+    +'<div class="card card-p" style="margin-bottom:20px"><div style="background:var(--surf2);border:1px solid var(--bdr2);border-radius:10px;padding:12px;font-size:12px;color:#9b5cff;word-break:break-all;font-weight:600">mattnejad-maker.github.io/bettrack-pro</div><p style="font-size:11px;color:var(--sub);margin-top:10px;line-height:1.6">In Safari: tap Share - Add to Home Screen to install as an app icon</p></div></div>';
 }
 function bindFormEvents(){
   var fids=["sport","betType","betDetail","teams","stake","odds","pot","date","book","notes"];
@@ -418,7 +437,7 @@ function bindFormEvents(){
 }
 window.tog=function(id){S.openCards[id]=!S.openCards[id];renderPage()};
 window.settle=function(id,status){
-  S.bets=S.bets.map(function(b){if(b.id!==id)return b;var payout=status===ST.WON?b.potentialPayout:status===ST.PUSH?b.stake:0;tgSend((status===ST.WON?"WIN":status===ST.PUSH?"PUSH":"LOSS")+" - "+b.teams+"\n"+(status===ST.WON?"Profit: +"+dollar(payout-b.stake):"Loss: "+dollar(b.stake)));return merge(b,{status:status,actualPayout:payout})});
+  S.bets=S.bets.map(function(b){if(b.id!==id)return b;var payout=status===ST.WON?b.potentialPayout:status===ST.PUSH?b.stake:0;tgSend(S.cfg.tgToken,S.cfg.tgChatId,(status===ST.WON?"WIN":status===ST.PUSH?"PUSH":"LOSS")+" - "+b.teams+"\n"+(status===ST.WON?"Profit: +"+dollar(payout-b.stake):"Loss: "+dollar(b.stake)));return merge(b,{status:status,actualPayout:payout})});
   lsSet(SK.BETS,S.bets);toast("Settled: "+status.toUpperCase());renderPage();
 };
 window.delBet=function(id){if(!confirm("Remove this bet?"))return;S.bets=S.bets.filter(function(b){return b.id!==id});lsSet(SK.BETS,S.bets);toast("Bet removed");renderPage()};
@@ -460,7 +479,7 @@ window.submitBet=function(){
   if(!f.teams||!f.stake){toast("Teams and stake are required","err");return}
   var bet={id:String(Date.now()),sport:f.sport,teams:f.teams,betType:f.betType,betDetail:f.betDetail,stake:parseFloat(f.stake),odds:f.odds,potentialPayout:parseFloat(f.potentialPayout)||0,gameDate:f.gameDate,bookmaker:f.bookmaker,notes:f.notes,status:ST.PENDING,createdAt:Date.now(),actualPayout:null};
   S.bets.unshift(bet);lsSet(SK.BETS,S.bets);
-  tgSend("New Bet: "+bet.sport+" - "+bet.teams+"\n"+bet.betType+": "+bet.betDetail+"\nStake: "+dollar(bet.stake)+" @ "+bet.odds+" to win "+dollar(bet.potentialPayout));
+  tgSend(S.cfg.tgToken,S.cfg.tgChatId,"New Bet: "+bet.sport+" - "+bet.teams+"\n"+bet.betType+": "+bet.betDetail+"\nStake: "+dollar(bet.stake)+" @ "+bet.odds+" to win "+dollar(bet.potentialPayout));
   S.form={sport:"NBA",teams:"",betType:"Spread",betDetail:"",stake:"",odds:"",potentialPayout:"",gameDate:todayStr(),bookmaker:"",notes:""};
   S.ocrHit=null;toast("Bet added!");go("dashboard");setTimeout(pollLive,1500);
 };
@@ -472,26 +491,35 @@ window.runAna=function(){
   S.anaLoading=true;renderPage();
   getAIAnalytics(settled).then(function(r){if(r){S.ana=r;lsSet(SK.ANA,r)}S.anaLoading=false;renderPage()}).catch(function(){S.anaLoading=false;renderPage()});
 };
-window.saveSett2=function(){
+window.saveOddsKey=function(){
   var ok=document.getElementById("s-ok");
-  var tt=document.getElementById("s-tt");
-  var tc=document.getElementById("s-tc");
-  if(ok)S.cfg.oddsKey=ok.value||S.cfg.oddsKey;
-  if(tt)S.cfg.tgToken=tt.value||S.cfg.tgToken;
-  if(tc)S.cfg.tgChatId=tc.value||S.cfg.tgChatId;
-  lsSet(SK.CFG,S.cfg);
-  toast("Settings saved!");
-};
-window.saveSett=function(){
-  var ok=document.getElementById("s-ok"),tt=document.getElementById("s-tt"),tc=document.getElementById("s-tc");
-  if(ok)S.cfg.oddsKey=ok.value;if(tt)S.cfg.tgToken=tt.value;if(tc)S.cfg.tgChatId=tc.value;
-  lsSet(SK.CFG,S.cfg);toast("Settings saved!");
+  if(ok&&ok.value){S.cfg.oddsKey=ok.value;lsSet(SK.CFG,S.cfg);toast("API key saved!")}
 };
 window.testConn=function(){
-  saveSett();if(!S.cfg.oddsKey)return;S.stTesting=true;renderPage();
+  saveOddsKey();
+  if(!S.cfg.oddsKey){toast("Enter API key first","err");return}
+  S.stTesting=true;renderPage();
   testKey(S.cfg.oddsKey).then(function(n){alert("Connected - "+n+" sports available");S.stTesting=false;renderPage()}).catch(function(){alert("Invalid key or quota exceeded");S.stTesting=false;renderPage()});
 };
-window.testTg=function(){saveSett2();tgSend("BetTrack Pro connected! You will get live updates and results for every bet.");alert("Test message sent!")};
+window.saveTg=function(){
+  var tt=document.getElementById("s-tt");
+  var tc=document.getElementById("s-tc");
+  var tok=tt?tt.value.trim():"";
+  var cid=tc?tc.value.trim():"";
+  if(!tok){toast("Enter Bot Token first","err");return}
+  if(!cid){toast("Enter Chat ID first","err");return}
+  S.cfg.tgToken=tok;
+  S.cfg.tgChatId=cid;
+  lsSet(SK.CFG,S.cfg);
+  fetch("https://api.telegram.org/bot"+tok+"/sendMessage",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({chat_id:cid,text:"BetTrack Pro connected! You will receive live updates, win probability alerts, and results for every bet.",parse_mode:"HTML"})
+  }).then(function(r){return r.json()}).then(function(d){
+    if(d.ok){toast("Telegram connected! Check your messages.")}
+    else{alert("Telegram error: "+(d.description||JSON.stringify(d)))}
+  }).catch(function(e){alert("Failed to connect: "+e.message)});
+};
 window.clearAll=function(){if(!confirm("Delete ALL bet data? Cannot be undone."))return;S.bets=[];S.ana=null;lsSet(SK.BETS,[]);lsSet(SK.ANA,null);toast("All data cleared");renderPage()};
 try{render();startPoll()}catch(e){document.getElementById("page").innerHTML='<div style="padding:30px;color:#f43f5e;font-size:13px;font-family:monospace"><b>Error: </b>'+(e&&e.message?e.message:String(e))+'</div>'}
 </script>
