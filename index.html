@@ -403,9 +403,9 @@ function settH(){
   var c=S.cfg;
   return '<div class="pg"><div class="ph">Setup</div></div><div style="padding:0 16px">'
     +'<div style="font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.8px;margin-bottom:10px">THE ODDS API</div>'
-    +'<div class="card card-p" style="margin-bottom:16px"><p style="font-size:13px;color:var(--sub);line-height:1.75;margin-bottom:14px">Get your key at <span style="color:#7dd3fc">the-odds-api.com</span> - Free tier available, $30/mo for full live data</p><div class="fgrp"><div class="flbl">API Key</div><input type="password" class="finp" id="s-ok" placeholder="Paste your key here..." value="'+esc(c.oddsKey)+'"/></div><div style="display:flex;gap:10px"><button class="btn-p btn-p-sm" onclick="testConn()"'+(S.stTesting||!c.oddsKey?" disabled":"")+'>'+(S.stTesting?'<span class="spinner"></span>':"Test Connection")+'</button><button class="btn-g btn-g-sm" onclick="saveSett()">Save</button></div></div>'
+    +'<div class="card card-p" style="margin-bottom:16px"><p style="font-size:13px;color:var(--sub);line-height:1.75;margin-bottom:14px">Get your key at <span style="color:#7dd3fc">the-odds-api.com</span> - Free tier available, $30/mo for full live data</p><div class="fgrp"><div class="flbl">API Key</div><input type="text" class="finp" id="s-ok" autocomplete="off" placeholder="Paste your key here..." value="'+esc(c.oddsKey)+'"/></div><div style="display:flex;gap:10px"><button class="btn-p btn-p-sm" onclick="testConn()"'+(S.stTesting||!c.oddsKey?" disabled":"")+'>'+(S.stTesting?'<span class="spinner"></span>':"Test Connection")+'</button><button class="btn-g btn-g-sm" onclick="saveSett()">Save</button></div></div>'
     +'<div style="font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.8px;margin-bottom:10px">TELEGRAM NOTIFICATIONS</div>'
-    +'<div class="card card-p" style="margin-bottom:16px"><p style="font-size:13px;color:var(--sub);line-height:1.85;margin-bottom:14px">1. Message <b style="color:#fff">@BotFather</b> on Telegram - /newbot - copy token<br/>2. Start your bot, then open:<br/><span style="color:#7dd3fc;font-size:11px">api.telegram.org/bot[TOKEN]/getUpdates</span><br/>3. Copy your <b style="color:#fff">chat_id</b></p><div class="fgrp"><div class="flbl">Bot Token</div><input type="password" class="finp" id="s-tt" placeholder="123456:ABCdef..." value="'+esc(c.tgToken)+'"/></div><div class="fgrp"><div class="flbl">Chat ID</div><input class="finp" id="s-tc" placeholder="123456789" value="'+esc(c.tgChatId)+'"/></div><button class="btn-p btn-p-sm" onclick="testTg()"'+(!c.tgToken||!c.tgChatId?" disabled":"")+'>Save & Send Test</button></div>'
+    +'<div class="card card-p" style="margin-bottom:16px"><p style="font-size:13px;color:var(--sub);line-height:1.85;margin-bottom:14px">1. Message <b style="color:#fff">@BotFather</b> on Telegram - /newbot - copy token<br/>2. Start your bot, then open:<br/><span style="color:#7dd3fc;font-size:11px">api.telegram.org/bot[TOKEN]/getUpdates</span><br/>3. Copy your <b style="color:#fff">chat_id</b></p><div class="fgrp"><div class="flbl">Bot Token</div><input type="text" class="finp" id="s-tt" autocomplete="off" placeholder="123456:ABCdef..." value="'+esc(c.tgToken)+'"/></div><div class="fgrp"><div class="flbl">Chat ID</div><input class="finp" id="s-tc" placeholder="123456789" value="'+esc(c.tgChatId)+'"/></div><button class="btn-p btn-p-sm" onclick="testTg()"'+(!c.tgToken||!c.tgChatId?" disabled":"")+'>Save & Send Test</button></div>'
     +'<div style="font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.8px;margin-bottom:10px">DATA</div>'
     +'<div class="card card-p" style="margin-bottom:16px"><p style="font-size:13px;color:var(--sub);margin-bottom:14px"><span style="color:#fff;font-weight:700">'+S.bets.length+'</span> bets stored - <span style="color:#fff;font-weight:700">'+dollar(S.bets.reduce(function(s,b){return s+b.stake},0))+'</span> total staked</p><button class="btn-danger" onclick="clearAll()">Delete All Data</button></div>'
     +'<div style="font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.8px;margin-bottom:10px">YOUR LIVE URL</div>'
@@ -473,11 +473,14 @@ window.runAna=function(){
   getAIAnalytics(settled).then(function(r){if(r){S.ana=r;lsSet(SK.ANA,r)}S.anaLoading=false;renderPage()}).catch(function(){S.anaLoading=false;renderPage()});
 };
 window.saveSett2=function(){
-  var ok=document.getElementById("s-ok"),tt=document.getElementById("s-tt"),tc=document.getElementById("s-tc");
-  if(ok&&ok.value)S.cfg.oddsKey=ok.value;
-  if(tt&&tt.value)S.cfg.tgToken=tt.value;
-  if(tc&&tc.value)S.cfg.tgChatId=tc.value;
+  var ok=document.getElementById("s-ok");
+  var tt=document.getElementById("s-tt");
+  var tc=document.getElementById("s-tc");
+  if(ok)S.cfg.oddsKey=ok.value||S.cfg.oddsKey;
+  if(tt)S.cfg.tgToken=tt.value||S.cfg.tgToken;
+  if(tc)S.cfg.tgChatId=tc.value||S.cfg.tgChatId;
   lsSet(SK.CFG,S.cfg);
+  toast("Settings saved!");
 };
 window.saveSett=function(){
   var ok=document.getElementById("s-ok"),tt=document.getElementById("s-tt"),tc=document.getElementById("s-tc");
